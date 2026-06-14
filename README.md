@@ -1,4 +1,4 @@
-# Multi-Objective Evolutionary Feature Selection
+# Multi-Objective Feature Selection
 ### NSGA-II for Medical Tabular Data
 
 <p align="left">
@@ -198,9 +198,9 @@ NSGA-II matches the best baselines on accuracy while returning not a single solu
 ## Repository Structure
 
 ```
-multi-objective-evolutionary-feature-selection-python/
+multi-objective-feature-selection/
 |
-+-- nsga2_feature_selection.py   # Main NSGA-II implementation + experiment runner
++-- run_experiment.py   # Main NSGA-II implementation + experiment runner
 +-- requirements.txt
 +-- LICENSE
 +-- README.md
@@ -211,8 +211,8 @@ multi-objective-evolutionary-feature-selection-python/
 ## Installation
 
 ```bash
-git clone https://github.com/royxlead/multi-objective-evolutionary-feature-selection-python.git
-cd multi-objective-evolutionary-feature-selection-python
+git clone https://github.com/royxlead/multi-objective-feature-selection.git
+cd multi-objective-feature-selection
 
 pip install -r requirements.txt
 ```
@@ -224,7 +224,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python nsga2_feature_selection.py
+python run_experiment.py
 ```
 
 The script loads the Wisconsin Breast Cancer dataset, runs NSGA-II for 30 generations across a population of 64, evaluates all Pareto-optimal solutions on the held-out test set, and plots the final Pareto front in objective space (accuracy vs. feature count).
@@ -248,9 +248,9 @@ NSGA-II (Deb et al., 2002) is one of the most cited multi-objective evolutionary
 ```bibtex
 @software{roy2025nsga2featureselection,
   author = {Roy, Sourav},
-  title  = {Multi-Objective Evolutionary Feature Selection: NSGA-II for Medical Tabular Data},
+  title  = {multi-objective-feature-selection: NSGA-II for Medical Tabular Data},
   year   = {2026},
-  url    = {https://github.com/royxlead/multi-objective-evolutionary-feature-selection-python}
+  url    = {https://github.com/royxlead/multi-objective-feature-selection}
 }
 ```
 
