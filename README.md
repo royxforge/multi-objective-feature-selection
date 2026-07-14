@@ -211,7 +211,7 @@ multi-objective-feature-selection/
 ## Installation
 
 ```bash
-git clone https://github.com/royxlead/multi-objective-feature-selection.git
+git clone https://github.com/royxforge/multi-objective-feature-selection.git
 cd multi-objective-feature-selection
 
 pip install -r requirements.txt
@@ -240,8 +240,8 @@ Multi-objective feature selection is an active research area in medical ML, wher
 NSGA-II (Deb et al., 2002) is one of the most cited multi-objective evolutionary algorithms, with strong theoretical guarantees on Pareto front convergence and diversity preservation via crowding distance. This implementation extends the standard NSGA-II formulation by jointly evolving feature masks and classifier hyperparameters in a single optimization loop - avoiding the two-stage bias introduced by selecting features first and tuning hyperparameters second.
 
 **Connection to related work:** The unsupervised confidence metric in [Unsupervised Confidence Estimation
-](https://github.com/royxlead/unsupervised-confidence-estimation) and the drift monitoring in [Production Drift Detection
-](https://github.com/royxlead/production-drift-detection) both operate on model outputs. Feature selection determines what goes into the model. These three projects form a coherent pipeline: select features carefully, monitor for drift, and quantify uncertainty in deployment.
+](https://github.com/royxforge/unsupervised-confidence-estimation) and the drift monitoring in [Production Drift Detection
+](https://github.com/royxforge/production-drift-detection) both operate on model outputs. Feature selection determines what goes into the model. These three projects form a coherent pipeline: select features carefully, monitor for drift, and quantify uncertainty in deployment.
 
 ---
 
@@ -252,12 +252,12 @@ NSGA-II (Deb et al., 2002) is one of the most cited multi-objective evolutionary
   author = {Roy, Sourav},
   title  = {multi-objective-feature-selection: NSGA-II for Medical Tabular Data},
   year   = {2026},
-  url    = {https://github.com/royxlead/multi-objective-feature-selection}
+  url    = {https://github.com/royxforge/multi-objective-feature-selection}
 }
 ```
 
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/royxlead">Sourav Roy</a> · Founding AI/ML Engineer · Yuga AI</sub>
+  <sub>Built by <a href="https://github.com/royxforge">Sourav Roy</a> · Artificial Intelligence Engineer · Accure Inc.</sub>
 </p>
