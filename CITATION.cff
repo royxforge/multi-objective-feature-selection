@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it as below."
+authors:
+  - family-names: Roy
+    given-names: Sourav
+    email: royxforge@proton.me
+    orcid: ""
+title: "Multi-Objective Feature Selection: NSGA-II for Medical Tabular Data"
+version: 0.2.0
+date-released: 2026-07-20
+url: "https://github.com/royxforge/multi-objective-feature-selection"
+repository-code: "https://github.com/royxforge/multi-objective-feature-selection"
+license: MIT
+keywords:
+  - feature selection
+  - NSGA-II
+  - multi-objective optimization
+  - evolutionary algorithm
+  - medical tabular data
+  - machine learning

@@ -12,6 +12,14 @@ No unreleased changes. All development is captured in the releases below.
 
 ---
 
+## [0.2.0] - 2026-07-20
+
+### Added
+
+- **Community health files**: Added `CODE_OF_CONDUCT.md` (Contributor Covenant v2.1), `CONTRIBUTING.md` (contribution guidelines), `SECURITY.md` (vulnerability reporting policy), and `CITATION.cff` (citation metadata). These files establish project governance, community participation guidelines, and academic attribution framework.
+
+---
+
 ## [0.1.0] - 2026-04-22
 
 ### Added
