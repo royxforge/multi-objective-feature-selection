@@ -6,9 +6,11 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ---
 
-## [Unreleased]
+## [0.3.0] - 2026-07-20
 
-No unreleased changes. All development is captured in the releases below.
+### Changed
+
+- **Git remote URL**: Updated from `royxlead/multi-objective-feature-selection.git` to `royxforge/multi-objective-feature-selection.git` to reflect the permanent repository home under the royxforge GitHub organization.
 
 ---
 
