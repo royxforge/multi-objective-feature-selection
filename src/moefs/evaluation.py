@@ -149,9 +149,17 @@ def compare_against_reference(
         if method_name == reference_name:
             continue
 
-        n = min(len(reference_scores), len(scores))
-        aligned_reference = np.asarray(reference_scores[:n], dtype=float)
-        aligned_candidate = np.asarray(scores[:n], dtype=float)
+        # Scores must come from the same repeated-CV splitter, so pair counts
+        # must match exactly. Truncating silently would misalign pairs.
+        if len(reference_scores) != len(scores):
+            raise ValueError(
+                f"Score arrays for method '{method_name}' have length {len(scores)} "
+                f"but reference has {len(reference_scores)}; cannot align pairs."
+            )
+
+        n = len(reference_scores)
+        aligned_reference = np.asarray(reference_scores, dtype=float)
+        aligned_candidate = np.asarray(scores, dtype=float)
 
         row: dict[str, float | str | bool] = {
             "dataset": dataset_name,

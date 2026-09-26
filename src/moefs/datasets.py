@@ -43,7 +43,12 @@ class TrainOnlyFeatureExpander:
         self._selected_indices: np.ndarray | None = None
         self._fitted = False
 
-    def fit(self, X_train: np.ndarray, feature_names: Sequence[str]) -> "TrainOnlyFeatureExpander":
+    def fit(
+        self,
+        X_train: np.ndarray,
+        feature_names: Sequence[str],
+        y: np.ndarray | None = None,
+    ) -> "TrainOnlyFeatureExpander":
         X = np.asarray(X_train, dtype=float)
         base_feature_names = [str(name) for name in feature_names]
 
@@ -63,8 +68,7 @@ class TrainOnlyFeatureExpander:
         expanded_names = list(self._poly.get_feature_names_out(np.asarray(base_feature_names, dtype=str)))
 
         if expanded.shape[1] > self.max_features:
-            variance = np.var(expanded, axis=0)
-            selected = np.argsort(variance)[::-1][: self.max_features]
+            selected = self._rank_columns(expanded, y)
             selected = np.sort(selected)
         else:
             selected = np.arange(expanded.shape[1], dtype=int)
@@ -81,6 +85,35 @@ class TrainOnlyFeatureExpander:
         )
         return self
 
+    def _rank_columns(self, expanded: np.ndarray, y: np.ndarray | None) -> np.ndarray:
+        """Pick the ``max_features`` most informative expanded columns.
+
+        With labels, rank by mutual information (label-aware and not driven
+        by raw feature magnitude). Raw variance ranking is biased: the
+        squared term of a large-scale input dominates every other column,
+        regardless of predictive value. Without labels (legacy callers) fall
+        back to variance and say so, since that ranking is scale-dependent.
+        """
+        if y is not None and np.unique(np.asarray(y)).size >= 2:
+            from sklearn.feature_selection import mutual_info_classif
+
+            mi = mutual_info_classif(
+                expanded,
+                np.asarray(y),
+                discrete_features=False,
+                n_neighbors=3,
+                random_state=0,
+            )
+            return np.argsort(mi)[::-1][: self.max_features]
+
+        self.logger.warning(
+            "No labels supplied for %s expansion pruning: falling back to "
+            "scale-dependent variance ranking.",
+            self.dataset_name,
+        )
+        variance = np.var(expanded, axis=0)
+        return np.argsort(variance)[::-1][: self.max_features]
+
     def transform(self, X: np.ndarray) -> np.ndarray:
         if not self._fitted:
             raise RuntimeError("TrainOnlyFeatureExpander must be fitted before transform.")
@@ -95,8 +128,13 @@ class TrainOnlyFeatureExpander:
         expanded = self._poly.transform(array)
         return expanded[:, self._selected_indices]
 
-    def fit_transform(self, X_train: np.ndarray, feature_names: Sequence[str]) -> np.ndarray:
-        self.fit(X_train=X_train, feature_names=feature_names)
+    def fit_transform(
+        self,
+        X_train: np.ndarray,
+        feature_names: Sequence[str],
+        y: np.ndarray | None = None,
+    ) -> np.ndarray:
+        self.fit(X_train=X_train, feature_names=feature_names, y=y)
         return self.transform(X_train)
 
 

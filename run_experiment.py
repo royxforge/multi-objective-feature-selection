@@ -68,6 +68,11 @@ def main() -> None:
         config.n_jobs = 1
         config.quick_mode = True
 
+    # Fail fast on an invalid configuration instead of running (or silently
+    # degrading) with values the experiment cannot support. Previously this
+    # validation existed but was never called for the CLI entry point.
+    config.validate()
+
     comparison_df, significance_df = run_full_experiment(config)
 
     print("\n=== Final Mean Performance by Method ===")

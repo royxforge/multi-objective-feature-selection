@@ -41,6 +41,7 @@ def _build_result_row(
     metrics: dict[str, float],
     train_cv_accuracy: float,
     hyperparameters: dict[str, object],
+    n_available_features: int,
 ) -> dict[str, object]:
     return {
         "dataset": dataset_name,
@@ -51,6 +52,10 @@ def _build_result_row(
         "recall": metrics["recall"],
         "f1_score": metrics["f1_score"],
         "n_features": int(metrics["n_features"]),
+        # Denominator for n_features: without it "9 features" reads as
+        # 9/30 originals when the selector actually chose 9 of 250 expanded
+        # columns (interaction terms included).
+        "n_available_features": int(n_available_features),
         "train_cv_accuracy": float(train_cv_accuracy),
         "hyperparameters": json.dumps(hyperparameters),
     }
@@ -219,9 +224,10 @@ def run_full_experiment(config: ExperimentConfig) -> tuple[pd.DataFrame, pd.Data
             dataset_name=dataset_name,
             logger=logger,
         )
-        X_train = expander.fit_transform(X_train, base_feature_names)
+        X_train = expander.fit_transform(X_train, base_feature_names, y=y_train)
         X_test = expander.transform(X_test)
         feature_names = expander.output_feature_names
+        n_available_features = len(feature_names)
 
         optimizer = NSGA2FeatureHyperOptimizer(config=config, logger=logger)
         evolution_result = optimizer.fit(
@@ -264,6 +270,7 @@ def run_full_experiment(config: ExperimentConfig) -> tuple[pd.DataFrame, pd.Data
                 metrics=nsga_metrics,
                 train_cv_accuracy=evolution_result.best_accuracy,
                 hyperparameters=evolution_result.best_hyperparameters,
+                n_available_features=n_available_features,
             )
         )
 
@@ -312,6 +319,7 @@ def run_full_experiment(config: ExperimentConfig) -> tuple[pd.DataFrame, pd.Data
                     metrics=baseline.metrics,
                     train_cv_accuracy=float(np.mean(baseline.cv_scores)),
                     hyperparameters=baseline.best_params,
+                    n_available_features=n_available_features,
                 )
             )
             method_scores[baseline.method_name] = _baseline_significance_scores(

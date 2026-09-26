@@ -52,7 +52,11 @@ class ExperimentConfig:
     hyper_mutation_prob: float = 0.3
 
     # Feature-space expansion to emulate high-dimensional settings
-    enable_feature_expansion: bool = True
+    # Off by default: polynomial expansion to feature_space_max columns turns
+    # the reported feature counts into "9 of up to 250 synthetic columns"
+    # while README-level claims read like "9 of 30 medical features". Enable
+    # it explicitly for experiments that want interaction terms.
+    enable_feature_expansion: bool = False
     feature_space_max: int = 250
 
     # Optional model families

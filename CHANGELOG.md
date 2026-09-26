@@ -6,6 +6,21 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **Significance test alignment**: `compare_against_reference` now raises when reference/candidate score arrays differ in length instead of silently truncating pairs (misaligned pairs invalidate the paired t-test/Wilcoxon).
+- **Expansion pruning bias**: with labels, `TrainOnlyFeatureExpander` ranks expanded columns by mutual information (`fit(..., y=)`); raw variance ranking preferred squares of large-magnitude inputs regardless of predictive value. Label-less legacy callers fall back to variance with a logged warning.
+
+### Changed (breaking)
+
+- **`enable_feature_expansion` now defaults to `False`**: the previous default expanded medical datasets to up to `feature_space_max` (250) synthetic columns while reported feature counts read like "9 of 30". Enable explicitly for interaction-term experiments.
+- **Result rows carry `n_available_features`** (denominator for `n_features`) in addition to the existing `base_features`/`expanded_features` overview columns.
+- `TrainOnlyFeatureExpander.fit/fit_transform` accept an optional `y` keyword (backward-compatible signature).
+
+---
+
 ## [0.3.0] - 2026-07-20
 
 ### Changed
