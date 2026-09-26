@@ -8,6 +8,8 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-26
+
 ### Fixed
 
 - **Significance test alignment**: `compare_against_reference` now raises when reference/candidate score arrays differ in length instead of silently truncating pairs (misaligned pairs invalidate the paired t-test/Wilcoxon).
