@@ -389,7 +389,7 @@ class NSGA2FeatureHyperOptimizer:
             pareto_records.append(
                 {
                     "accuracy": float(individual.fitness.values[0]),
-                    "n_features": int(len(selected_indices)),
+                    "n_features": len(selected_indices),
                     "selected_indices": selected_indices,
                     "classifier": str(params["classifier"]),
                     "hyperparameters": params,

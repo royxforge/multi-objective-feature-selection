@@ -8,6 +8,10 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ## [Unreleased]
 
+### Changed
+
+- **Cleanup**: removed redundant `int(...)` casts around already-integer values (`len(...)`, `array.shape[...]`) in the experiment summary tables.
+
 ## [0.4.0] - 2026-09-26
 
 ### Fixed

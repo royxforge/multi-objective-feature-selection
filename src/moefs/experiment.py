@@ -343,9 +343,9 @@ def run_full_experiment(config: ExperimentConfig) -> tuple[pd.DataFrame, pd.Data
             {
                 "dataset": dataset_name,
                 "n_samples": int(X.shape[0]),
-                "base_features": int(len(base_feature_names)),
-                "expanded_features": int(len(feature_names)),
-                "selected_features_nsga": int(len(selected_indices)),
+                "base_features": len(base_feature_names),
+                "expanded_features": len(feature_names),
+                "selected_features_nsga": len(selected_indices),
                 "selected_classifier_nsga": evolution_result.best_classifier,
             }
         )
