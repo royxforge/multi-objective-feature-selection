@@ -8,6 +8,12 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-13
+
+### Added
+
+- **Dataset selection by name**: `run_experiment.py` accepts `--datasets "Pima Indians Diabetes,Heart Disease"` (values are matched against the canonical keys `wisconsin`/`pima`/`heart`, the display labels printed by the new `--list-datasets` flag, or known aliases such as `breast`, case-insensitively), and keeps `--limit` for "first N". Previously the only control was `--limit` plus deleting cached CSVs, so reproducing a single dataset meant re-running the ones before it. Unknown names fail fast with the available keys, an explicitly empty `--datasets ""` is rejected instead of quietly running every dataset, and duplicate entries (`--datasets pima,pima`) collapse to a single run, keeping the loaded datasets in the order requested.
+
 ### Changed
 
 - **Cleanup**: removed redundant `int(...)` casts around already-integer values (`len(...)`, `array.shape[...]`) in the experiment summary tables.

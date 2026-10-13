@@ -6,8 +6,8 @@ authors:
     email: royxforge@gmail.com
     orcid: ""
 title: "Multi-Objective Feature Selection: NSGA-II for Medical Tabular Data"
-version: 0.2.0
-date-released: 2026-07-20
+version: 0.5.0
+date-released: 2026-10-13
 url: "https://github.com/royxforge/multi-objective-feature-selection"
 repository-code: "https://github.com/royxforge/multi-objective-feature-selection"
 license: MIT

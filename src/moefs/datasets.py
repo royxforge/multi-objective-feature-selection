@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import logging
-from typing import Sequence
+from typing import Callable, Sequence
 
 import numpy as np
 import pandas as pd
@@ -259,20 +259,119 @@ def load_heart_disease(raw_data_dir: Path, logger: logging.Logger) -> DatasetBun
     )
 
 
+# Canonical keys accepted by ``load_medical_datasets(datasets=...)`` and the
+# ``--datasets`` CLI flag. Declared separately from the loaders so discovery
+# (`available_datasets`) needs no I/O.
+DATASET_KEYS = ("wisconsin", "pima", "heart")
+
+DATASET_LABELS = {
+    "wisconsin": "Wisconsin Breast Cancer",
+    "pima": "Pima Indians Diabetes",
+    "heart": "Heart Disease (Cleveland)",
+}
+
+
+# Extra spellings accepted by ``--datasets`` in addition to the canonical keys
+# and the display labels. ``--list-datasets`` prints the labels, so a user who
+# copies a label must not be told the dataset does not exist.
+DATASET_ALIASES = {
+    "breast": "wisconsin",
+    "breast cancer": "wisconsin",
+    "wisconsin breast cancer": "wisconsin",
+    "diabetes": "pima",
+    "pima indians diabetes": "pima",
+    "heart disease": "heart",
+    "heart disease (cleveland)": "heart",
+    "cleveland": "heart",
+}
+
+
+def available_datasets() -> list[str]:
+    """Return the canonical keys of the bundled datasets (no I/O)."""
+    return list(DATASET_KEYS)
+
+
+def resolve_dataset_key(name: str) -> str | None:
+    """Map a user-supplied dataset name to its canonical key.
+
+    Accepts the canonical key, the display label used by ``--list-datasets``, or
+    a known alias; matching ignores case and surrounding whitespace. Returns
+    ``None`` when nothing matches.
+    """
+    candidate = " ".join(name.split()).lower()
+    if candidate in DATASET_KEYS:
+        return candidate
+    if candidate in DATASET_ALIASES:
+        return DATASET_ALIASES[candidate]
+    for key, label in DATASET_LABELS.items():
+        if candidate == label.lower():
+            return key
+    return None
+
+
+def resolve_dataset_keys(names: Sequence[str]) -> list[str]:
+    """Resolve user-supplied names to unique canonical keys, in order.
+
+    Duplicate spellings of the same dataset collapse to one entry, so
+    ``["pima", "Pima Indians Diabetes"]`` yields ``["pima"]`` rather than
+    loading the dataset twice.
+
+    Raises:
+        ValueError: The list is empty, or contains a name that matches no
+            bundled dataset.
+    """
+    requested = [name.strip() for name in names if name and name.strip()]
+    if not requested:
+        raise ValueError("datasets must contain at least one non-empty name.")
+
+    resolved: list[str] = []
+    unknown: list[str] = []
+    for raw in requested:
+        key = resolve_dataset_key(raw)
+        if key is None:
+            unknown.append(raw)
+        elif key not in resolved:
+            resolved.append(key)
+
+    if unknown:
+        raise ValueError(
+            f"unknown dataset(s): {', '.join(unknown)}; "
+            f"available: {', '.join(DATASET_KEYS)} (e.g. --datasets pima,heart)"
+        )
+    return resolved
+
+
 def load_medical_datasets(
     raw_data_dir: Path,
     logger: logging.Logger,
     dataset_limit: int | None = None,
+    datasets: Sequence[str] | None = None,
 ) -> list[DatasetBundle]:
-    """Load required medical datasets."""
+    """Load required medical datasets.
 
-    loaders = [
-        lambda: load_wisconsin_breast_cancer(logger),
-        lambda: load_pima_diabetes(raw_data_dir, logger),
-        lambda: load_heart_disease(raw_data_dir, logger),
-    ]
+    Parameters
+    ----------
+    dataset_limit :
+        Load only the first N datasets, in the canonical order.
+    datasets :
+        Dataset names selecting exactly which datasets to load, in the given
+        order. Each entry may be a canonical key (see
+        :func:`available_datasets`), the display label shown by
+        ``--list-datasets``, or a known alias. When provided it takes precedence
+        over ``dataset_limit``.
+    """
 
-    if dataset_limit is not None:
-        loaders = loaders[:dataset_limit]
+    loaders_by_key: dict[str, Callable[[], DatasetBundle]] = {
+        "wisconsin": lambda: load_wisconsin_breast_cancer(logger),
+        "pima": lambda: load_pima_diabetes(raw_data_dir, logger),
+        "heart": lambda: load_heart_disease(raw_data_dir, logger),
+    }
+
+    if datasets is not None:
+        loaders = [loaders_by_key[key] for key in resolve_dataset_keys(datasets)]
+    else:
+        loaders = [loaders_by_key[key] for key in DATASET_KEYS]
+        if dataset_limit is not None:
+            loaders = loaders[:dataset_limit]
 
     return [loader() for loader in loaders]

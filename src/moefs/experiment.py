@@ -185,6 +185,7 @@ def run_full_experiment(config: ExperimentConfig) -> tuple[pd.DataFrame, pd.Data
         raw_data_dir=config.raw_data_dir,
         logger=logger,
         dataset_limit=config.dataset_limit,
+        datasets=config.datasets,
     )
 
     if config.dataset_limit is not None:

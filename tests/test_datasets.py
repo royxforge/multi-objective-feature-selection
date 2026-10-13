@@ -7,7 +7,16 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from moefs.datasets import TrainOnlyFeatureExpander, _download_csv
+from moefs.datasets import (
+    DATASET_LABELS,
+    TrainOnlyFeatureExpander,
+    _download_csv,
+    available_datasets,
+    load_medical_datasets,
+    resolve_dataset_key,
+    resolve_dataset_keys,
+)
+from moefs.config import ExperimentConfig
 
 
 def _test_logger() -> logging.Logger:
@@ -128,3 +137,116 @@ def test_download_csv_writes_cache_file(tmp_path, monkeypatch) -> None:
     pd.testing.assert_frame_equal(result, expected)
     cached = real_read_csv(output_path)
     pd.testing.assert_frame_equal(cached, expected)
+
+
+# --- Dataset selection (available_datasets / load_medical_datasets / config) ---
+
+
+def test_available_datasets_lists_canonical_keys() -> None:
+    assert available_datasets() == ["wisconsin", "pima", "heart"]
+
+
+def test_select_datasets_loads_only_the_requested_one(tmp_path) -> None:
+    logger = logging.getLogger("test-selection")
+    bundles = load_medical_datasets(tmp_path, logger, datasets=["wisconsin"])
+    assert [b.name for b in bundles] == ["Wisconsin Breast Cancer"]
+
+
+def test_selection_is_case_insensitive_and_order_preserving(tmp_path) -> None:
+    logger = logging.getLogger("test-selection")
+    bundles = load_medical_datasets(tmp_path, logger, datasets=[" HEART ", "wisconsin"])
+    assert [b.name for b in bundles] == [
+        "Heart Disease (Cleveland)",
+        "Wisconsin Breast Cancer",
+    ]
+
+
+def test_unknown_dataset_key_raises(tmp_path) -> None:
+    logger = logging.getLogger("test-selection")
+    with pytest.raises(ValueError, match="unknown dataset"):
+        load_medical_datasets(tmp_path, logger, datasets=["nope"])
+
+
+def test_empty_dataset_selection_raises(tmp_path) -> None:
+    logger = logging.getLogger("test-selection")
+    with pytest.raises(ValueError):
+        load_medical_datasets(tmp_path, logger, datasets=["  ", ""])
+
+
+def test_dataset_limit_still_applies_when_no_names_given(tmp_path) -> None:
+    logger = logging.getLogger("test-selection")
+    bundles = load_medical_datasets(tmp_path, logger, dataset_limit=1)
+    assert [b.name for b in bundles] == ["Wisconsin Breast Cancer"]
+
+
+def test_config_accepts_dataset_names() -> None:
+    config = ExperimentConfig(population_size=16, generations=2, datasets=["pima"])
+    config.validate()
+    assert config.datasets == ["pima"]
+
+
+def test_config_rejects_datasets_plus_limit() -> None:
+    config = ExperimentConfig(
+        population_size=16, generations=2, datasets=["pima"], dataset_limit=1
+    )
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        config.validate()
+
+
+def test_config_rejects_empty_dataset_list() -> None:
+    config = ExperimentConfig(population_size=16, generations=2, datasets=["  "])
+    with pytest.raises(ValueError, match="at least one"):
+        config.validate()
+
+
+class TestDatasetNameResolution:
+    """`--datasets` accepts keys, display labels and aliases."""
+
+    @pytest.mark.parametrize(
+        ("raw", "expected"),
+        [
+            ("pima", "pima"),
+            ("PIMA", "pima"),
+            ("  heart  ", "heart"),
+            ("Pima Indians Diabetes", "pima"),
+            ("heart disease (cleveland)", "heart"),
+            ("Wisconsin Breast Cancer", "wisconsin"),
+            ("breast", "wisconsin"),
+            ("diabetes", "pima"),
+            ("cleveland", "heart"),
+        ],
+    )
+    def test_names_resolve_to_canonical_keys(self, raw, expected):
+        assert resolve_dataset_key(raw) == expected
+
+    @pytest.mark.parametrize("raw", ["", "   ", "mnist", "breast cancer x"])
+    def test_unknown_names_return_none(self, raw):
+        assert resolve_dataset_key(raw) is None
+
+    def test_labels_printed_by_list_datasets_are_accepted(self):
+        """The listing shows labels, so copying one must not fail."""
+
+        for key in available_datasets():
+            assert resolve_dataset_key(DATASET_LABELS[key]) == key
+
+    def test_resolution_keeps_requested_order(self):
+        assert resolve_dataset_keys(["heart", "wisconsin"]) == ["heart", "wisconsin"]
+
+    def test_duplicates_collapse_to_one_entry(self):
+        assert resolve_dataset_keys(["pima", "Pima Indians Diabetes", "pima"]) == ["pima"]
+
+    def test_blank_entries_are_ignored(self):
+        assert resolve_dataset_keys(["", "pima", "  "]) == ["pima"]
+
+    def test_empty_selection_is_rejected(self):
+        with pytest.raises(ValueError, match="at least one non-empty"):
+            resolve_dataset_keys(["", "   "])
+
+    def test_unknown_name_error_lists_available_keys(self):
+        with pytest.raises(ValueError) as excinfo:
+            resolve_dataset_keys(["pima", "nope"])
+
+        message = str(excinfo.value)
+        assert "nope" in message
+        for key in available_datasets():
+            assert key in message

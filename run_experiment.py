@@ -9,6 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from moefs.config import ExperimentConfig  # noqa: E402
+from moefs.datasets import DATASET_LABELS, available_datasets  # noqa: E402
 from moefs.experiment import run_full_experiment  # noqa: E402
 
 
@@ -40,11 +41,30 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional limit for number of datasets to run (useful for CI and smoke tests).",
     )
+    parser.add_argument(
+        "--datasets",
+        default=None,
+        metavar="KEYS",
+        help=(
+            "Comma-separated dataset keys to run, e.g. --datasets pima,heart. "
+            "Takes precedence over --dataset-limit."
+        ),
+    )
+    parser.add_argument(
+        "--list-datasets",
+        action="store_true",
+        help="List the available dataset keys and exit.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    if args.list_datasets:
+        for key in available_datasets():
+            print(f"{key:<12} {DATASET_LABELS[key]}")
+        return
 
     config = ExperimentConfig(
         project_root=PROJECT_ROOT,
@@ -54,6 +74,14 @@ def main() -> None:
         enable_feature_expansion=not args.disable_feature_expansion,
         enable_xgboost=args.enable_xgboost,
         dataset_limit=args.dataset_limit,
+        # ``is not None`` (not truthiness): an explicitly empty ``--datasets ""``
+        # is a request that selected nothing, which must fail rather than quietly
+        # fall back to running every dataset.
+        datasets=(
+            [s.strip() for s in args.datasets.split(",")]
+            if args.datasets is not None
+            else None
+        ),
     )
 
     if args.quick:

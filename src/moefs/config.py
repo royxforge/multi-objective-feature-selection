@@ -77,6 +77,9 @@ class ExperimentConfig:
 
     # Dataset control
     dataset_limit: int | None = None
+    # Canonical dataset keys (see moefs.datasets.available_datasets()); when
+    # set, it takes precedence over dataset_limit.
+    datasets: list[str] | None = None
 
     # Paths
     project_root: Path = field(default_factory=lambda: Path("."))
@@ -123,3 +126,11 @@ class ExperimentConfig:
             raise ValueError("permutation_top_k must be at least 1.")
         if self.dataset_limit is not None and self.dataset_limit < 1:
             raise ValueError("dataset_limit must be at least 1 when provided.")
+        if self.datasets is not None:
+            if not [d for d in self.datasets if d and str(d).strip()]:
+                raise ValueError("datasets must contain at least one non-empty key when provided.")
+            if self.dataset_limit is not None:
+                raise ValueError(
+                    "datasets and dataset_limit are mutually exclusive; "
+                    "select datasets by name or by count, not both."
+                )

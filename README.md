@@ -224,12 +224,36 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
+# All three bundled medical datasets
 python run_experiment.py
+
+# Pick which datasets to run (keys, display names or aliases)
+python run_experiment.py --datasets "Pima Indians Diabetes,Heart Disease"
+python run_experiment.py --datasets pima,heart
+
+# See what is available, or keep the first N datasets
+python run_experiment.py --list-datasets
+python run_experiment.py --limit 1
 ```
 
-The script loads the Wisconsin Breast Cancer dataset, runs NSGA-II for 30 generations across a population of 64, evaluates all Pareto-optimal solutions on the held-out test set, and plots the final Pareto front in objective space (accuracy vs. feature count).
+```console
+$ python run_experiment.py --list-datasets
+wisconsin    Wisconsin Breast Cancer
+pima         Pima Indians Diabetes
+heart        Heart Disease (Cleveland)
+```
 
-To swap the dataset, replace the data loading block with any binary classification dataset in sklearn-compatible format (X, y arrays). The optimizer is dataset-agnostic.
+Each run loads the selected datasets, runs NSGA-II for 30 generations across a population of 64, evaluates all Pareto-optimal solutions on the held-out test set, and plots the Pareto front in objective space (accuracy vs. feature count).
+
+| Flag | Effect |
+|------|--------|
+| `--datasets "A,B"` | Run only the named datasets (keys, display names or aliases; case-insensitive; duplicates collapse) |
+| `--list-datasets` | Print the available dataset keys and exit |
+| `--limit N` | Keep only the first `N` datasets (useful for smoke tests) |
+
+To add another dataset, extend `src/moefs/datasets.py` with a loader and register
+it; the optimizer is dataset-agnostic and works with any binary classification
+dataset in sklearn-compatible format (X, y arrays).
 
 ---
 
