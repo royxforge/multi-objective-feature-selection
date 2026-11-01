@@ -2,10 +2,10 @@
   "config": {
     "seed": 42,
     "test_size": 0.2,
-    "cv_folds": 2,
-    "n_jobs": 1,
-    "population_size": 4,
-    "generations": 1,
+    "cv_folds": 5,
+    "n_jobs": -1,
+    "population_size": 32,
+    "generations": 10,
     "crossover_prob": 0.9,
     "mutation_prob": 0.3,
     "mask_mutation_prob": 0.02,
@@ -14,14 +14,17 @@
     "feature_space_max": 250,
     "enable_xgboost": false,
     "significance_alpha": 0.05,
-    "significance_cv_splits": 2,
-    "significance_cv_repeats": 1,
-    "significance_min_pairs": 2,
-    "permutation_repeats": 2,
-    "permutation_top_k": 5,
+    "significance_cv_splits": 5,
+    "significance_cv_repeats": 3,
+    "significance_min_pairs": 8,
+    "permutation_repeats": 30,
+    "permutation_top_k": 20,
     "quick_mode": false,
-    "dataset_limit": 1,
-    "project_root": "D:\\Coding\\s",
+    "dataset_limit": null,
+    "datasets": [
+      "wisconsin"
+    ],
+    "project_root": "D:\\Programming\\Github Repo\\multi-objective-feature-selection",
     "data_dir": "data",
     "plots_dir": "plots",
     "results_dir": "results",
@@ -80,25 +83,25 @@
       ]
     }
   },
-  "runtime_seconds": 322.46731409999484,
+  "runtime_seconds": 951.2512641000067,
   "datasets_processed": [
     "Wisconsin Breast Cancer"
   ],
   "environment": {
-    "timestamp_utc": "2026-04-16T07:38:33.189809+00:00",
-    "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "timestamp_utc": "2026-11-01T04:23:52.317513+00:00",
+    "python_version": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
     "python_implementation": "CPython",
     "platform": "Windows-11-10.0.26200-SP0",
     "machine": "AMD64",
     "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel"
   },
   "package_versions": {
-    "numpy": "2.4.3",
-    "pandas": "3.0.1",
-    "scikit-learn": "1.8.0",
-    "deap": "1.4.3",
-    "scipy": "1.17.1",
-    "matplotlib": "3.10.8",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scikit-learn": "1.9.1",
+    "deap": "1.4.4",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
     "seaborn": "0.13.2",
     "xgboost": "not-installed"
   }

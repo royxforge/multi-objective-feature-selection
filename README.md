@@ -6,10 +6,18 @@
   <img src="https://img.shields.io/badge/Algorithm-NSGA--II-14b8a6?style=flat-square" />
   <img src="https://img.shields.io/badge/Domain-Medical%20Tabular-f59e0b?style=flat-square" />
   <img src="https://img.shields.io/badge/Scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white" />
+  <a href="https://github.com/royxforge/multi-objective-feature-selection/actions/workflows/ci.yml"><img src="https://github.com/royxforge/multi-objective-feature-selection/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <img src="https://img.shields.io/badge/License-MIT-6366f1?style=flat-square" />
 </p>
 
-> Applying NSGA-II multi-objective evolutionary optimization to feature selection on medical tabular data. Simultaneously optimizes two competing objectives - maximizing classifier accuracy and minimizing feature count - surfacing the full Pareto-optimal trade-off curve rather than collapsing it into a single metric.
+> **NSGA-II applied to feature selection on medical tabular data, optimising accuracy and feature count at the same time instead of collapsing them into one score.** You get the whole Pareto front back, so a deployment constraint can pick a point rather than a hyperparameter choosing for you. Every baseline it is compared against is committed with the results.
+>
+> **Result:** **4 features out of 30** — an 87% reduction — at **96.49%** test accuracy, above the best full-feature RandomForest baseline (**94.74%** on all 30). The whole front is committed: 3 features still reach 95.38% cross-validated accuracy, and 6 features peak at 97.14%.
+>
+> **Try it on CPU:** `python run_experiment.py --quick --dataset-limit 1 --disable-feature-expansion --population-size 8 --generations 2`
+
+<img src="docs/demo.gif" alt="Terminal demo: run_experiment.py --quick on CPU - NSGA-II vs the baselines" width="820" />
+
 
 ---
 
@@ -42,7 +50,7 @@ Standard approaches (RFE, importance-based selection, PCA) collapse this trade-o
 
 ## Key Result
 
-> **9 features out of 30 (70% reduction) at 94.74% test accuracy** - matching the best full-feature baseline (Grid Search RandomForest, 30 features, 94.74%) while discarding 21 features entirely.
+> **4 features out of 30 (87% reduction) at 96.49% test accuracy**, beating the best full-feature baseline (Grid Search RandomForest, 30 features, 94.74%) while discarding 26 features. The 3-feature point still reaches 95.38% cross-validated accuracy, and 6 features peak at 97.14%.
 
 ---
 
@@ -53,13 +61,13 @@ Single-objective feature selection methods used as baselines:
 | Method | Test Accuracy | Features Used | Trade-off Visible |
 |---|---|---|---|
 | Grid Search RF | 94.74% | 30 | No |
-| RF Importance + RF | 94.74% | 30 | No |
-| RFE + RandomForest | 94.74% | 7 | No |
-| PCA + RandomForest | 93.86% | 10 components | No |
-| Random Search RF | 91.23% | 30 | No |
-| **NSGA-II (this work)** | **94.74%** | **9** | **Yes - full Pareto front** |
+| RF Importance + RF | 94.74% | 22 | No |
+| RFE + RandomForest | 94.74% | 30 | No |
+| PCA + RandomForest | 92.98% | 5 components | No |
+| Random Search RF | 94.74% | 30 | No |
+| **NSGA-II (this work)** | **96.49%** | **4** | **Yes - full Pareto front** |
 
-RFE reaches 7 features at the same accuracy, but returns a single solution with no information about what the curve looks like between 7 and 30 features. NSGA-II returns the full front - every Pareto-optimal (accuracy, feature count) pair discovered during evolution.
+Every single-objective baseline returns one solution and leaves the trade-off invisible. NSGA-II returns the full front - every Pareto-optimal (accuracy, feature count) pair discovered during evolution - so the 3-feature and 6-feature points are available from the same run.
 
 ---
 
@@ -77,7 +85,7 @@ Non-dominated Sorting Genetic Algorithm II maintains a population of candidate (
 
 ```
 Initialize population of (feature mask, RF hyperparameters)
-Population size: 64, Generations: 30
+Population size: 32, Generations: 10 (CLI defaults: 64 / 30)
          |
          v
 +---------------------+
@@ -102,7 +110,7 @@ Population size: 64, Generations: 30
            |
      Next Generation
            |
-     (30 generations)
+     (10 generations)
            |
            v
     Pareto Front of (feature subset, classifier) pairs
@@ -139,8 +147,8 @@ The framework also supports SVM (RBF/linear, C and gamma evolved in log space) a
 
 | Parameter | Value |
 |---|---|
-| Population size | 64 |
-| Generations | 30 |
+| Population size | 32 |
+| Generations | 10 |
 | Crossover probability | 0.9 |
 | Mutation probability (individual) | 0.3 |
 | Bit-flip probability (per feature) | 0.02 |
@@ -148,31 +156,27 @@ The framework also supports SVM (RBF/linear, C and gamma evolved in log space) a
 | Crossover type | Uniform (feature mask) + Blend alpha=0.3 (hyperparameters) |
 | Selection | NSGA-II via DEAP selNSGA2 |
 
+The committed run uses 32 individuals over 10 generations with 5-fold CV; the CLI defaults (64 / 30) take considerably longer on CPU. Raise them with `--population-size` / `--generations`.
+
 ---
 
 ## Results
 
-### Pareto-Optimal Solution
+### Pareto-Optimal Solutions
 
-The Pareto front converged to a solution that matches full-feature baselines with 70% of the feature space removed:
+The front keeps improving accuracy while the feature count falls, so the reduction is not bought with accuracy:
 
-| Metric | Value |
-|---|---|
-| Test Accuracy | **94.74%** |
-| Features Selected | **9 / 30** |
-| Feature Reduction | **70%** |
-| F1-Score | 0.958 |
-| Precision | 0.971 |
-| Recall | 0.944 |
-| CV Training Accuracy | 96.05% |
+| Features | CV Accuracy (evolution) | Feature Reduction |
+|---|---|---|
+| 3 / 30 | 95.38% | 90% |
+| **4 / 30 (selected)** | **96.92%** | **87%** |
+| 6 / 30 | 97.14% | 80% |
 
-**Evolved classifier configuration:**
-- Algorithm: RandomForestClassifier
-- n_estimators: 132
-- max_depth: 24
-- min_samples_split: 3
-- min_samples_leaf: 4
-- max_features: 0.57
+The selected 4-feature solution scores **96.49% on the held-out test set** - F1 0.972, precision 0.986, recall 0.958 - against 96.92% CV accuracy during evolution. Only the selected solution is evaluated on the test split; the other front points are ranked by CV accuracy.
+
+**Evolved classifier configurations on the front:**
+- 4 features (`[1, 18, 23, 24]`): RandomForestClassifier, n_estimators 131, max_depth 5, min_samples_split 7, min_samples_leaf 3, max_features 0.58
+- 6 features (`[1, 21, 22, 23, 24, 27]`): RandomForestClassifier, n_estimators 278, max_depth 10, min_samples_split 7, min_samples_leaf 1, max_features 0.31
 
 ### What the Pareto Front Shows
 
@@ -185,13 +189,15 @@ The front maps every discovered (feature count, accuracy) trade-off point from t
 | Method | Test Accuracy | Features | Notes |
 |---|---|---|---|
 | Grid Search RF | 94.74% | 30 | Exhaustive hyperparameter search, all features |
-| RF Importance + RF | 94.74% | 30 | Importance-ranked, no feature reduction |
-| RFE + RandomForest | 94.74% | 7 | Single solution, no trade-off curve |
-| PCA + RandomForest | 93.86% | 10 components | Components, not original features - loses interpretability |
-| Random Search RF | 91.23% | 30 | Suboptimal hyperparameters |
-| **NSGA-II (this work)** | **94.74%** | **9** | **Full Pareto front, joint feature + hyperparameter optimization** |
+| RF Importance + RF | 94.74% | 22 | Importance-ranked, no trade-off |
+| RFE + RandomForest | 94.74% | 30 | Single solution, no trade-off curve |
+| PCA + RandomForest | 92.98% | 5 components | Components, not original features - loses interpretability |
+| Random Search RF | 94.74% | 30 | Suboptimal hyperparameters |
+| **NSGA-II (this work)** | **96.49%** | **4** | **Full Pareto front, joint feature + hyperparameter optimization** |
 
-NSGA-II matches the best baselines on accuracy while returning not a single solution but a complete trade-off curve - something no single-objective method can produce.
+NSGA-II beats every baseline on accuracy while using 4 features instead of 30, and returns a complete trade-off curve rather than one point.
+
+Paired across 15 folds, the improvement is significant against Random Search RF after Holm correction (adjusted p = 0.027); against Grid Search, RFE, RF Importance and PCA the margin is positive but does not survive correction (adjusted p = 0.17-0.23). One 569-sample dataset does not support a stronger claim than that.
 
 ---
 
@@ -243,7 +249,7 @@ pima         Pima Indians Diabetes
 heart        Heart Disease (Cleveland)
 ```
 
-Each run loads the selected datasets, runs NSGA-II for 30 generations across a population of 64, evaluates all Pareto-optimal solutions on the held-out test set, and plots the Pareto front in objective space (accuracy vs. feature count).
+Each run loads the selected datasets, runs NSGA-II for the configured number of generations across the configured population (defaults: 30 generations, population 64), evaluates all Pareto-optimal solutions on the held-out test set, and plots the Pareto front in objective space (accuracy vs. feature count).
 
 | Flag | Effect |
 |------|--------|
@@ -265,7 +271,7 @@ NSGA-II (Deb et al., 2002) is one of the most cited multi-objective evolutionary
 
 **Connection to related work:** The unsupervised confidence metric in [Unsupervised Confidence Estimation
 ](https://github.com/royxforge/unsupervised-confidence-estimation) and the drift monitoring in [Production Drift Detection
-](https://github.com/royxforge/production-drift-detection) both operate on model outputs. Feature selection determines what goes into the model. These three projects form a coherent pipeline: select features carefully, monitor for drift, and quantify uncertainty in deployment. [Unified Time Series Foundation Model](https://github.com/royxforge/unified-time-series-foundation-model) extends the same philosophy to time series foundation models, where the 15 meta-features used for model selection are a forecasting-specific analog of the feature economy question studied here.
+](https://github.com/royxforge/production-drift-detection) both operate on model outputs. Feature selection determines what goes into the model. These three projects form a coherent pipeline: select features carefully, monitor for drift, and quantify uncertainty in deployment. [Unified Time Series Foundation Model](https://github.com/royxforge/uniftsm) extends the same philosophy to time series foundation models, where the 15 meta-features used for model selection are a forecasting-specific analog of the feature economy question studied here.
 
 ---
 

@@ -8,6 +8,10 @@ The format follows the guidance at [Keep a Changelog](https://keepachangelog.com
 
 ## [Unreleased]
 
+### Changed
+
+- **Committed results regenerated at a real optimisation scale**: the checked-in artefacts previously came from a single-generation smoke configuration while the README described the 30-generation setup. The run in `results/` now uses 32 individuals over 10 generations with 5-fold CV (15 paired folds for the significance tests), and the README reports its actual numbers: 4 features at 96.49% test accuracy against a 94.74% full-feature baseline, with the 3- and 6-feature front points at 95.38% and 97.14% cross-validated accuracy. The significance claim was narrowed to what the data supports - the gain is significant against Random Search RF after Holm correction (adjusted p = 0.027) and not significant against the remaining baselines.
+
 ## [0.5.0] - 2026-10-13
 
 ### Added

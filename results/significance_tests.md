@@ -1,7 +1,7 @@
 | dataset | reference_method | comparison_method | n_pairs | enough_pairs | mean_diff_reference_minus_candidate | ci95_low | ci95_high | t_statistic | t_p_value | wilcoxon_statistic | wilcoxon_p_value | raw_p_value | holm_adjusted_p_value | cohens_d | significant_at_alpha |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Wisconsin Breast Cancer | NSGA-II (DEAP) | PCA + RandomForest | 2.0 | True | 0.0022 | -0.1374 | 0.1417 | 0.1979 | 0.8756 | 1.0 | 1.0 | 1.0 | 1.0 | 0.1399 | False |
-| Wisconsin Breast Cancer | NSGA-II (DEAP) | RFE + RandomForest | 2.0 | True | 0.0 | 0.0 | 0.0 | nan | nan | 0.0 | 1.0 | 1.0 | 1.0 | 0.0 | False |
-| Wisconsin Breast Cancer | NSGA-II (DEAP) | RF Importance + RandomForest | 2.0 | True | -0.0044 | -0.0045 | -0.0043 | -455.0 | 0.0014 | 0.0 | 0.5 | 0.5 | 1.0 | -321.7336 | False |
-| Wisconsin Breast Cancer | NSGA-II (DEAP) | Grid Search RF | 2.0 | True | -0.0044 | -0.0045 | -0.0043 | -455.0 | 0.0014 | 0.0 | 0.5 | 0.5 | 1.0 | -321.7336 | False |
-| Wisconsin Breast Cancer | NSGA-II (DEAP) | Random Search RF | 2.0 | True | 0.0088 | -0.0473 | 0.0649 | 1.9934 | 0.296 | 0.0 | 0.5 | 0.5 | 1.0 | 1.4096 | False |
+| Wisconsin Breast Cancer | NSGA-II (DEAP) | PCA + RandomForest | 15.0 | True | 0.0132 | -0.0007 | 0.027 | 2.0437 | 0.0603 | 28.0 | 0.1217 | 0.1217 | 0.2328 | 0.5277 | False |
+| Wisconsin Breast Cancer | NSGA-II (DEAP) | RFE + RandomForest | 15.0 | True | 0.0095 | 0.0013 | 0.0178 | 2.4758 | 0.0267 | 10.5 | 0.0423 | 0.0423 | 0.1691 | 0.6392 | False |
+| Wisconsin Breast Cancer | NSGA-II (DEAP) | RF Importance + RandomForest | 15.0 | True | 0.0066 | -0.0016 | 0.0148 | 1.7185 | 0.1077 | 15.5 | 0.1164 | 0.1164 | 0.2328 | 0.4437 | False |
+| Wisconsin Breast Cancer | NSGA-II (DEAP) | Grid Search RF | 15.0 | True | 0.0081 | -0.0007 | 0.0168 | 1.9757 | 0.0682 | 13.0 | 0.0722 | 0.0722 | 0.2166 | 0.5101 | False |
+| Wisconsin Breast Cancer | NSGA-II (DEAP) | Random Search RF | 15.0 | True | 0.0154 | 0.0078 | 0.0229 | 4.3653 | 0.0006 | 6.0 | 0.0054 | 0.0054 | 0.0271 | 1.1271 | True |
